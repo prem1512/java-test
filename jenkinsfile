@@ -1,5 +1,8 @@
 pipeline {
     agent any
+    parameters {
+        choice(name: 'Branch'), choices: ['main', 'staging'],    
+    }
 stages{
     stage("checkout")
     {
@@ -7,7 +10,7 @@ stages{
     script{
         checkout([
         $class: 'GitSCM',
-        branches: [[name: "main" ]], 
+        branches: [[name: params.Branch ]], 
         userRemoteConfigs: [[
             url: "https://github.com/prem1512/java-test.git",
             credentialsId: "cred-git"
@@ -16,6 +19,17 @@ stages{
     }
     }
 }
+ stage("Build")
+ {
+    stage('Build') {
+            steps {
+                script {
+                    echo "Building for ${params.Branch} deployment"
+                    sh "mvn clean install -Denv=${params.Branch} "
+                }
+            }
+        }
+ }
 
     }
 }
